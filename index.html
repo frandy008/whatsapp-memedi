@@ -108,7 +108,7 @@
 					let message = $('textarea[name="message"]').val().replace('${nama}', nama);
 					console.log(message)
 					$.ajax({
-						url: 'http://localhost:8000/send-message',
+						url: 'https://whatsapp-memedi.herokuapp.com/send-message',
 						type: 'POST',
 						dataType: 'json',
 						data: {
