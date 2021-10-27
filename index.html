@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link href="../assets/css/bootstrap.min.css" rel="stylesheet">
 
     <title>WA X Memedi</title>
   </head>
@@ -18,14 +18,17 @@
 			<span class="navbar-brand mb-0 h1">WhatsApp API</span>
 		</div>
 	</nav>
+
+	<div class="container">
+		<div class="row">
+			<h1 class="text-center my-3">Whatsapp X Memedi</h1>
+			<p class="text-center">Created by <a href="https://github.com/frandy008/">IMFDP</a></p>
+		</div>
+	</div>
+
 	<div class="container">
 		<div id="app">
 			<div class="col-12">
-				<div class="row">
-					<h1 class="text-center my-3">Whatsapp X Memedi</h1>
-					<p class="text-center">Powered by Memedi Inside</p>
-				</div>
-
 				<div class="row">
 					<div class="col-lg-3 col-md-4 mb-3">
 						<div class="card">
@@ -33,14 +36,14 @@
 							<div class="card-body">
 								<img src="" class="img-fluid" alt="QR Code" id="qrcode">
 							</div>
-							<div class="card-footer">
+							<div class="card-footer overflow-auto" style="height: 200px;">
 								<h3>Logs:</h3>
 								<ul class="logs"></ul>
 							</div>
 						</div>
 					</div>
 
-					<div class="col-lg-9 col-md-8">
+					<div class="col-lg-6 col-md-4 mb-3">
 						<div class="card">
 							<div class="card-header bg-primary text-white">Data</div>
 							<div class="card-body">
@@ -67,6 +70,26 @@
 							</div>
 						</div>
 					</div>
+
+					<div class="col-lg-3 col-md-4 mb-3">
+						<div class="card">
+							<div class="card-header bg-primary text-white">Daftar Kontak <button class="btn btn-warning btn-sm btn-load-kontak">Refresh</button></div>
+							<div class="card-body">
+								<div class="table-responsive">
+									<table class="table">
+										<thead>
+											<tr>
+												<th>Nama</th>
+												<th>Nomor</th>
+											</tr>
+										</thead>
+										<tbody id="kontak">
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
 			
@@ -75,143 +98,12 @@
 	</div>
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" crossorigin="anonymous"></script>
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+	<script src="../assets/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js" crossorigin="anonymous"></script>
+	<script src="../assets/js/memedi_library_enc.js"></script>
 	<script>
-		$(document).ready(function() {
-			var socket = io();
-
-			socket.on('message', function(msg) {
-				$('.logs').append($('<li>').text(msg));
-			});
-
-			socket.on('qr', function(src) {
-				$('#qrcode').attr('src', src);
-				$('#qrcode').show();
-			});
-			
-			socket.on('ready', function(data) {
-				$('#qrcode').attr('src', 'assets/img/wa.png');
-				//$('#qrcode').hide();
-			});
-
-			socket.on('authenticated', function(data) {
-				$('#qrcode').attr('src', 'assets/img/wa.png');
-				//$('#qrcode').hide();
-			});
-
-			$('.btn-kirim').on('click', function(){
-				let x = JSON.parse(sessionStorage.getItem('data'));
-				for (let i = 0; i < x.data.length; i++) {
-					let number = x.data[i].no_hp;
-					let nama = `*${x.data[i].nama}*`;
-					let message = $('textarea[name="message"]').val().replace('${nama}', nama);
-					console.log(message)
-					$.ajax({
-						url: 'https://whatsapp-memedi.herokuapp.com/send-message',
-						type: 'POST',
-						dataType: 'json',
-						data: {
-							'number': number,
-							'message': message
-						},
-						success:function(s){
-							if (s.status == true) {
-								$('.logs').append($('<li>').text('Berhasil mengirim pesan ke '+number));
-								}else{
-								$('.logs').append($('<li>').text('Gagal mengirim pesan ke '+number));
-							}
-						},
-						error:function(e){
-							console.log(e.responseText);
-						}
-					});
-				}
-			})
-		});
-
-		$('.btn-cek').on('click', function(){
-			get_data2($('input[name="ssid"]').val());
-		});
-
-		function get_data(id){
-			let datax = `{
-										"response": true,
-										"data": [
-									`;
-			const url = 'https://docs.google.com/spreadsheets/d/';
-			const ssid = id;
-			const q1 = '/gviz/tq?';
-			const q2 = 'tqx=out:json';
-			const q3 = 'sheet=people'
-		
-			const endpoint1 = `${url}${ssid}${q1}&${q2}&${q3}`;
-
-			fetch(endpoint1)
-			.then(res => res.text())
-			.then(data =>{
-				const json = JSON.parse(data.substr(47).slice(0,-2));
-				console.log(json);
-				for (let r = 0; r < json.table.rows.length; r++) {
-					if ((json.table.rows.length - 1) != r) {
-						datax += `{
-											"id": "${r}",
-											"nama": "${json.table.rows[r].c[1].v}",
-											"no_hp": "${json.table.rows[r].c[2].v}"
-											},`;
-					}else{
-						datax += `{
-											"id": "${r}",
-											"nama": "${json.table.rows[r].c[1].v}",
-											"no_hp": "${json.table.rows[r].c[2].v}"
-											}`;
-					}
-				}
-				datax += ']}';
-				console.log(JSON.parse(datax));
-			})
-		}
-
-		function get_data2(id){
-			$.ajax({
-				url: 'https://docs.google.com/spreadsheets/d/'+id+'/gviz/tq?&tqx=out:json&sheet=people',
-				type: 'GET',
-				dataType: 'html',
-				success:function(s){
-					const json = JSON.parse(s.substr(47).slice(0,-2));
-					console.log(json);
-					if (json.status == 'ok') {
-						alert('Data ditemukan !');
-						let data = `{
-												"response": true,
-												"data": [
-												`;
-						for (let r = 0; r < json.table.rows.length; r++) {
-							if ((json.table.rows.length - 1) != r) {
-								data += `{
-													"id": "${r}",
-													"nama": "${json.table.rows[r].c[1].v}",
-													"no_hp": "${json.table.rows[r].c[2].v}"
-													},`;
-							}else{
-								data += `{
-													"id": "${r}",
-													"nama": "${json.table.rows[r].c[1].v}",
-													"no_hp": "${json.table.rows[r].c[2].v}"
-													}`;
-							}
-						}
-						data += ']}';
-						sessionStorage.setItem('data', data);
-					}else{
-						alert('Data tidak ditemukan !');
-					}
-				},
-				error:function(e){
-					console.log(e.responseText);
-				}
-			});
-		}
+		let url = 'http://localhost:8000'; //Endpoint silahkan di sesuaikan dengan setingan sobat
 	</script>
+	<script src="../assets/js/main.js"></script>
 </body>
 </html>

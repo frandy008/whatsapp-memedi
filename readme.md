@@ -1,9 +1,13 @@
-# WhatsApp X Memedi
+# Whatsapp API Node JS
 
-# Cara penggunaan
-- Download atau clone repo
-- Masuk ke directory dengan terminal
-- install package yang dibutuhkan
-- Jalankan
+Source <a href="https://github.com/pedroslopez/whatsapp-web.js">whatsapp-web.js</a>
 
-Pastikan kalian sudah menginstall Node JS
+### Cara penggunaan
+
+- Clone atau download repository ini
+- Masuk ke directory
+- jalankan `npm install`
+- jalankan `npm run start:dev`
+- Scan QR Code
+- Enjoy!
+

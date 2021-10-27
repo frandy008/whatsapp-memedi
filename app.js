@@ -13,6 +13,8 @@ const mime = require('mime-types');
 const port = process.env.PORT || 8000;
 
 const app = express();
+app.use(express.static('public'));
+
 const server = http.createServer(app);
 const io = socketIO(server);
 
@@ -23,10 +25,6 @@ app.use(express.urlencoded({
 app.use(fileUpload({
   debug: false
 }));
-app.use(express.static('public'));
-app.use('/css', express.static(__dirname + 'public/assets/css'));
-app.use('/js', express.static(__dirname + 'public/assets/js'));
-app.use('/img', express.static(__dirname + 'public/assets/img'));
 
 const SESSION_FILE_PATH = './whatsapp-session.json';
 let sessionCfg;
@@ -354,5 +352,5 @@ app.post('/clear-message', [
 });
 
 server.listen(port, function() {
-  console.log('App running on *: ' + port);
+  console.log('App running on *: http://localhost:' + port);
 });
